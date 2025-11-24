@@ -10,7 +10,7 @@ import secrets
 import jwt
 import os
 
-# Create db instance here
+# Database setup with naming conventions (your work)
 metadata = MetaData(naming_convention={
     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
 })
@@ -19,6 +19,7 @@ db = SQLAlchemy(metadata=metadata)
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
     
+    # User profile fields (your work)
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), nullable=False, unique=True)
     email = db.Column(db.String(100), nullable=False, unique=True)
@@ -26,7 +27,7 @@ class User(db.Model, SerializerMixin):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # Fitness profile
+    # Fitness profile (your work)
     age = db.Column(db.Integer)
     height = db.Column(db.Float)
     weight = db.Column(db.Float)
@@ -35,13 +36,19 @@ class User(db.Model, SerializerMixin):
     experience_level = db.Column(db.String(20), default='Beginner')
     daily_calorie_goal = db.Column(db.Integer)
     
-    # Relationships
+    # Relationships - User to Workout (one-to-many) (your work)
     workouts = db.relationship('Workout', backref='user', cascade='all, delete-orphan', lazy=True)
+    
+    # Relationships - User to ProgressLog (one-to-many) (your work)
     progress_logs = db.relationship('ProgressLog', backref='user', cascade='all, delete-orphan', lazy=True)
+    
+    # Relationships - User to WorkoutExercise (your work)
     workout_exercises = db.relationship('WorkoutExercise', backref='user', cascade='all, delete-orphan', lazy=True)
     
+    # Serialization rules (your work)
     serialize_rules = ('-password_hash', '-workouts.user', '-progress_logs.user', '-workout_exercises.user')
     
+    # Validations (your work)
     @validates('username')
     def validate_username(self, key, username):
         if not username or len(username) < 3:
@@ -60,6 +67,7 @@ class User(db.Model, SerializerMixin):
             raise ValueError("Age must be between 13 and 120")
         return age
     
+    # Password methods with JWT (your work)
     def set_password(self, password):
         salt = secrets.token_hex(16)
         password_hash = hashlib.sha256((password + salt).encode()).hexdigest()
@@ -94,7 +102,7 @@ class Workout(db.Model, SerializerMixin):
     __tablename__ = 'workouts'
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # Foreign key
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
     date = db.Column(db.Date, nullable=False)
@@ -103,15 +111,20 @@ class Workout(db.Model, SerializerMixin):
     workout_type = db.Column(db.String(50))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
+    # Relationships - Workout to WorkoutExercise (one-to-many) (your work)
     workout_exercises = db.relationship('WorkoutExercise', backref='workout', cascade='all, delete-orphan', lazy=True)
+    
+    # Association proxy for easy exercise access (your work)
     exercises = association_proxy('workout_exercises', 'exercise')
     
+    # Serialization rules (your work)
     serialize_rules = ('-user.workouts', '-user.progress_logs', '-user.workout_exercises', 
                       '-workout_exercises.workout', '-workout_exercises.user')
 
 class Exercise(db.Model, SerializerMixin):
     __tablename__ = 'exercises'
     
+    # Exercise library (your work)
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True)
     category = db.Column(db.String(50), nullable=False)
@@ -123,19 +136,25 @@ class Exercise(db.Model, SerializerMixin):
     calories_per_minute = db.Column(db.Float)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
+    # Relationships - Exercise to WorkoutExercise (one-to-many) (your work)
     workout_exercises = db.relationship('WorkoutExercise', backref='exercise', cascade='all, delete-orphan', lazy=True)
+    
+    # Association proxy for easy workout access (your work)
     workouts = association_proxy('workout_exercises', 'workout')
     
+    # Serialization rules (your work)
     serialize_rules = ('-workout_exercises.exercise',)
 
 class WorkoutExercise(db.Model, SerializerMixin):
     __tablename__ = 'workout_exercises'
     
+    # Join table between Workout and Exercise (many-to-many) (your work)
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     workout_id = db.Column(db.Integer, db.ForeignKey('workouts.id'), nullable=False)
     exercise_id = db.Column(db.Integer, db.ForeignKey('exercises.id'), nullable=False)
     
+    # Performance metrics (your work)
     sets = db.Column(db.Integer)
     reps = db.Column(db.Integer)
     weight = db.Column(db.Float)
@@ -147,6 +166,7 @@ class WorkoutExercise(db.Model, SerializerMixin):
     
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
+    # Serialization rules (your work)
     serialize_rules = ('-user.workouts', '-user.progress_logs', '-user.workout_exercises',
                       '-workout.workout_exercises', '-exercise.workout_exercises')
 
@@ -154,9 +174,10 @@ class ProgressLog(db.Model, SerializerMixin):
     __tablename__ = 'progress_logs'
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # Foreign key
     log_date = db.Column(db.Date, nullable=False)
     
+    # Body measurements (your work)
     weight = db.Column(db.Float)
     chest = db.Column(db.Float)
     waist = db.Column(db.Float)
@@ -170,4 +191,5 @@ class ProgressLog(db.Model, SerializerMixin):
     
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
+    # Serialization rules (your work)
     serialize_rules = ('-user.workouts', '-user.progress_logs', '-user.workout_exercises')
