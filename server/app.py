@@ -10,31 +10,31 @@ from sqlalchemy import MetaData
 app = Flask(__name__)
 
 # App configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'  # Use SQLite database
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Disable modification tracking
-app.json.compact = False  # Pretty print JSON
-app.secret_key = os.environ.get('SECRET_KEY') or 'fitflow-secret-key-2024'  # For sessions
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.json.compact = False
+app.secret_key = os.environ.get('SECRET_KEY') or 'fitflow-secret-key-2024'
 
-# Database setup with naming conventions
+# Database setup
 metadata = MetaData(naming_convention={
     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
 })
-db = SQLAlchemy(metadata=metadata)  # Create database instance
+db = SQLAlchemy(metadata=metadata)
 
-# Import models after db is created
-from models import User, Workout, Exercise, WorkoutExercise, ProgressLog
-
-# Initialize database migration and connect to app
+# Initialize extensions (models will be imported later)
 migrate = Migrate(app, db)
 db.init_app(app)
 
 # Create API and enable CORS
-api = Api(app)  # REST API
-CORS(app)  # Allow cross-origin requests
+api = Api(app)
+CORS(app)
+
+# Import models AFTER db is created to avoid circular imports
+# This import happens after all the setup is complete
 
 @app.route('/')
 def index():
     return '<h1>FitFlow Fitness Tracker API</h1>'
 
 if __name__ == '__main__':
-    app.run(port=5555, debug=True)  # Run in debug mode on port 5555
+    app.run(port=5555, debug=True)
