@@ -1,20 +1,28 @@
+import jwt
 from functools import wraps
 from flask import request, jsonify, current_app
-import jwt
 from server.models import User
+
+def create_token(user_id):
+    payload = {"user_id": user_id}
+    token = jwt.encode(payload, current_app.config["JWT_SECRET_KEY"], algorithm="HS256")
+    return token
 
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        token = request.headers.get("Authorization", "").replace("Bearer ", "")
+        token = request.headers.get("Authorization", None)
         if not token:
-            return jsonify({"message": "Token is missing"}), 401
+            return jsonify({"error": "Token missing"}), 401
+        if token.startswith("Bearer "):
+            token = token.replace("Bearer ", "")
         try:
-            payload = jwt.decode(token, current_app.config["JWT_SECRET_KEY"], algorithms=["HS256"])
-            current_user = User.query.get(payload["user_id"])
-            if not current_user:
-                return jsonify({"message": "User not found"}), 404
-        except Exception as e:
-            return jsonify({"message": "Token is invalid", "error": str(e)}), 401
-        return f(current_user, *args, **kwargs)
+            data = jwt.decode(token, current_app.config["JWT_SECRET_KEY"], algorithms=["HS256"])
+            user_id = data.get("user_id")
+            user = User.query.get(user_id)
+            if not user:
+                raise Exception("User not found")
+        except Exception:
+            return jsonify({"error": "Invalid or expired token"}), 401
+        return f(current_user=user, *args, **kwargs)
     return decorated
