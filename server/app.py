@@ -1,28 +1,22 @@
-import os
 from flask import Flask
 from flask_cors import CORS
-from flask_migrate import Migrate
 from flask_restful import Api
+from server.config import Config
+from server.extensions import db, migrate
+from server.routes import register_routes
 
-# Import db from models (your work)
-from models import db
-
-# Create Flask app
+# Initialize app
 app = Flask(__name__)
-
-# Database configuration (your work)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.json.compact = False
-app.secret_key = os.environ.get('SECRET_KEY') or 'fitflow-secret-key-2024'
-
-# Initialize database extensions (your work)
-migrate = Migrate(app, db)
-db.init_app(app)
-
-# Create API and enable CORS
-api = Api(app)
+app.config.from_object(Config)
 CORS(app)
+api = Api(app)
+
+# Initialize DB and Migrate
+db.init_app(app)
+migrate.init_app(app, db)
+
+# Register all routes
+register_routes(api)
 
 @app.route('/')
 def index():
