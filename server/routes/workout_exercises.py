@@ -1,9 +1,11 @@
 from flask import request, jsonify
 from flask_restful import Resource
-from models import db, WorkoutExercise
-from routes.users import token_required
 
-# -------------------------
+# Import models from server package
+from server.models import db, WorkoutExercise, User
+
+# Import token decorator from utils
+from server.utils.jwt_handler import token_required
 # WorkoutExercises list (GET all, POST new)
 # -------------------------
 class WorkoutExerciseListResource(Resource):
