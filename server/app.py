@@ -1,32 +1,33 @@
-import os
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
-from flask_migrate import Migrate
 from flask_restful import Api
+from server.config import Config
+from server.extensions import db, migrate
+from server.routes import register_routes
 
-# Import db from models (your work)
-from models import db
+def create_app():
+    """Flask application factory"""
+    app = Flask(__name__)
+    app.config.from_object(Config)
 
-# Create Flask app
-app = Flask(__name__)
+    CORS(app)
+    db.init_app(app)
+    migrate.init_app(app, db)
 
-# Database configuration (your work)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.json.compact = False
-app.secret_key = os.environ.get('SECRET_KEY') or 'fitflow-secret-key-2024'
+    api = Api(app)
+    register_routes(api)
 
-# Initialize database extensions (your work)
-migrate = Migrate(app, db)
-db.init_app(app)
+    @app.route('/')
+    def index():
+        return jsonify({"message": "FitFlow Fitness Tracker API is running"}), 200
 
-# Create API and enable CORS
-api = Api(app)
-CORS(app)
+    @app.errorhandler(Exception)
+    def handle_exception(e):
+        response = {"error": str(e), "message": "An unexpected error occurred"}
+        return jsonify(response), 500
 
-@app.route('/')
-def index():
-    return '<h1>FitFlow Fitness Tracker API</h1>'
+    return app
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+    app = create_app()
     app.run(port=5555, debug=True)

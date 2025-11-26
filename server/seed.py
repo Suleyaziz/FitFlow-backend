@@ -1,5 +1,5 @@
 from app import app, db
-from models import User, Workout, Exercise, WorkoutExercise, ProgressLog
+from server.models import User, Workout, Exercise, WorkoutExercise, ProgressLog
 from datetime import datetime, timedelta
 import random
 
