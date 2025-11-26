@@ -2,8 +2,8 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_restful import Api
 from config import Config
-from extensions import db, migrate
-from routes import register_routes
+from extensions import db, migrate  # ← Now in same directory
+from server.routes import register_routes  # ← Changed
 
 def create_app():
     """Flask application factory"""
@@ -28,3 +28,6 @@ def create_app():
 
     return app
 
+if __name__ == "__main__":
+    app = create_app()
+    app.run(port=5555, debug=True)

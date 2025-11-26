@@ -1,7 +1,9 @@
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
+# Only load .env file in development, not production
+if os.getenv('FLASK_ENV') != 'production':
+    from dotenv import load_dotenv
+    load_dotenv()
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
