@@ -1,5 +1,5 @@
 from flask_restful import Resource
-from flask import request, jsonify
+from flask import request
 from models import User, db
 from utils.jwt_handler import create_token
 
@@ -39,6 +39,7 @@ class LoginAPI(Resource):
 
         token = create_token(user.id)
         if not token:
-            return{"error":"Token creation failed"}, 500
+            return {"error": "Token creation failed"}, 500
         
-        return jsonify({"message": "Login successful", "token": token, "user": user.to_dict()})
+        # FIXED LINE:
+        return {"message": "Login successful", "token": token, "user": user.to_dict()}, 200

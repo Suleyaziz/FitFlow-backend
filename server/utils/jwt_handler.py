@@ -1,6 +1,6 @@
 import jwt
 from functools import wraps
-from flask import request, jsonify, current_app
+from flask import request, current_app
 from models import User
 
 def create_token(user_id):
@@ -21,7 +21,7 @@ def token_required(f):
     def decorated(*args, **kwargs):
         token = request.headers.get("Authorization", None)
         if not token:
-            return jsonify({"error": "Token missing"}), 401
+            return {"error": "Token missing"}, 401  # REMOVED jsonify()
         if token.startswith("Bearer "):
             token = token.replace("Bearer ", "")
         try:
@@ -32,6 +32,6 @@ def token_required(f):
                 raise Exception("User not found")
         except Exception as e:
             print(f"Token validation error: {e}")  # Debug
-            return jsonify({"error": "Invalid or expired token"}), 401
+            return {"error": "Invalid or expired token"}, 401  # REMOVED jsonify()
         return f(current_user=user, *args, **kwargs)
     return decorated

@@ -28,8 +28,8 @@ class User(db.Model, SerializerMixin):
     progress_logs = db.relationship("ProgressLog", backref="user", cascade="all, delete-orphan", lazy=True)
     workout_exercises = db.relationship("WorkoutExercise", backref="user", cascade="all, delete-orphan", lazy=True)
 
-    # SIMPLIFIED: Remove all relationship serialization
-    serialize_rules = ('-password_hash', '-workouts', '-progress_logs', '-workout_exercises')
+    # FIXED: Proper serialize_rules for DateTime handling
+    serialize_rules = ('-password_hash', '-workouts', '-progress_logs', '-workout_exercises', '-created_at')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -37,7 +37,7 @@ class User(db.Model, SerializerMixin):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    # Add a simple to_dict method for auth responses
+    # Keep this for auth responses (it excludes created_at)
     def to_dict(self):
         return {
             'id': self.id,
@@ -80,8 +80,8 @@ class Workout(db.Model, SerializerMixin):
 
     workout_exercises = db.relationship("WorkoutExercise", backref="workout", cascade="all, delete-orphan", lazy=True)
     
-    # SIMPLIFIED: Remove all relationship serialization
-    serialize_rules = ('-workout_exercises',)
+    # FIXED: Exclude DateTime fields and relationships
+    serialize_rules = ('-workout_exercises', '-created_at', '-date')
 
 # -----------------------
 # Exercise model
@@ -98,8 +98,8 @@ class Exercise(db.Model, SerializerMixin):
 
     workout_exercises = db.relationship("WorkoutExercise", backref="exercise", cascade="all, delete-orphan", lazy=True)
     
-    # SIMPLIFIED: Remove all relationship serialization
-    serialize_rules = ('-workout_exercises',)
+    # FIXED: Exclude DateTime field
+    serialize_rules = ('-workout_exercises', '-created_at')
 
 # -----------------------
 # WorkoutExercise model
@@ -121,8 +121,8 @@ class WorkoutExercise(db.Model, SerializerMixin):
     order = db.Column(db.Integer)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # SIMPLIFIED: Remove all relationship serialization
-    serialize_rules = ()
+    # FIXED: Exclude DateTime field
+    serialize_rules = ('-created_at',)
 
 # -----------------------
 # ProgressLog model
@@ -142,5 +142,5 @@ class ProgressLog(db.Model, SerializerMixin):
     notes = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # SIMPLIFIED: Remove all relationship serialization
-    serialize_rules = ()
+    # FIXED: Exclude DateTime fields
+    serialize_rules = ('-created_at', '-log_date')

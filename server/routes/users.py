@@ -1,5 +1,5 @@
 # server/routes/users.py
-from flask import request, jsonify, current_app
+from flask import request, current_app
 from flask_restful import Resource
 from models import User
 from extensions import db
