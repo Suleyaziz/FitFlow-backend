@@ -3,7 +3,7 @@ from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy.orm import validates
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-from server.extensions import db
+from extensions import db
 
 # -----------------------
 # User model
@@ -28,13 +28,27 @@ class User(db.Model, SerializerMixin):
     progress_logs = db.relationship("ProgressLog", backref="user", cascade="all, delete-orphan", lazy=True)
     workout_exercises = db.relationship("WorkoutExercise", backref="user", cascade="all, delete-orphan", lazy=True)
 
-    serialize_rules = ('-password_hash', '-workouts.user', '-progress_logs.user', '-workout_exercises.user')
+    # FIXED: Remove circular references
+    serialize_rules = ('-password_hash', '-workouts.user', '-progress_logs.user', '-workout_exercises.user', '-workouts.workout_exercises.workout')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+    # Add a simple to_dict method for auth responses
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'username': self.username,
+            'email': self.email,
+            'age': self.age,
+            'height': self.height,
+            'weight': self.weight,
+            'fitness_goal': self.fitness_goal,
+            'target_weight': self.target_weight
+        }
 
     @validates("username")
     def validate_username(self, key, username):
@@ -65,7 +79,9 @@ class Workout(db.Model, SerializerMixin):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     workout_exercises = db.relationship("WorkoutExercise", backref="workout", cascade="all, delete-orphan", lazy=True)
-    serialize_rules = ('-user.workouts', '-workout_exercises.workout')
+    
+    # FIXED: Simplify serialize rules
+    serialize_rules = ('-user.workouts', '-workout_exercises.workout', '-workout_exercises.user')
 
 # -----------------------
 # Exercise model
@@ -81,6 +97,8 @@ class Exercise(db.Model, SerializerMixin):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     workout_exercises = db.relationship("WorkoutExercise", backref="exercise", cascade="all, delete-orphan", lazy=True)
+    
+    # FIXED: Simplify
     serialize_rules = ('-workout_exercises.exercise',)
 
 # -----------------------
@@ -103,7 +121,8 @@ class WorkoutExercise(db.Model, SerializerMixin):
     order = db.Column(db.Integer)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    serialize_rules = ('-user.workouts', '-workout.workout_exercises', '-exercise.workout_exercises')
+    # FIXED: Remove circular references
+    serialize_rules = ('-user.workout_exercises', '-workout.workout_exercises', '-exercise.workout_exercises')
 
 # -----------------------
 # ProgressLog model
@@ -123,4 +142,5 @@ class ProgressLog(db.Model, SerializerMixin):
     notes = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    serialize_rules = ('-user.workouts', '-user.progress_logs')
+    # FIXED: Simplify
+    serialize_rules = ('-user.progress_logs',)

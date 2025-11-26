@@ -1,7 +1,9 @@
-from app import app, db
-from server.models import User, Workout, Exercise, WorkoutExercise, ProgressLog
+from app import create_app, db
+from models import User, Workout, Exercise, WorkoutExercise, ProgressLog
 from datetime import datetime, timedelta
 import random
+
+app = create_app()
 
 def clear_data():
     """Clear existing data from all tables"""
@@ -19,20 +21,20 @@ def create_exercises():
     
     exercises = [
         # Cardio exercises
-        Exercise(name="Running", category="Cardio", muscle_group="Full Body", equipment="None", difficulty="Beginner", calories_per_minute=10.0),
-        Exercise(name="Cycling", category="Cardio", muscle_group="Legs", equipment="Bicycle", difficulty="Beginner", calories_per_minute=8.5),
-        Exercise(name="Jump Rope", category="Cardio", muscle_group="Full Body", equipment="Jump Rope", difficulty="Intermediate", calories_per_minute=12.0),
+        Exercise(name="Running", category="Cardio", muscle_group="Full Body", description="Outdoor or treadmill running for cardiovascular health"),
+        Exercise(name="Cycling", category="Cardio", muscle_group="Legs", description="Stationary or outdoor cycling"),
+        Exercise(name="Jump Rope", category="Cardio", muscle_group="Full Body", description="High-intensity cardio with jump rope"),
         
         # Strength exercises
-        Exercise(name="Push-ups", category="Strength", muscle_group="Chest", equipment="None", difficulty="Beginner", calories_per_minute=7.0),
-        Exercise(name="Squats", category="Strength", muscle_group="Legs", equipment="None", difficulty="Beginner", calories_per_minute=6.5),
-        Exercise(name="Dumbbell Curls", category="Strength", muscle_group="Biceps", equipment="Dumbbells", difficulty="Beginner", calories_per_minute=5.0),
-        Exercise(name="Bench Press", category="Strength", muscle_group="Chest", equipment="Barbell", difficulty="Intermediate", calories_per_minute=8.0),
-        Exercise(name="Deadlift", category="Strength", muscle_group="Back", equipment="Barbell", difficulty="Advanced", calories_per_minute=9.0),
+        Exercise(name="Push-ups", category="Strength", muscle_group="Chest", description="Bodyweight chest exercise"),
+        Exercise(name="Squats", category="Strength", muscle_group="Legs", description="Fundamental lower body exercise"),
+        Exercise(name="Dumbbell Curls", category="Strength", muscle_group="Biceps", description="Bicep isolation exercise with dumbbells"),
+        Exercise(name="Bench Press", category="Strength", muscle_group="Chest", description="Barbell chest press exercise"),
+        Exercise(name="Deadlift", category="Strength", muscle_group="Back", description="Compound full-body strength exercise"),
         
         # Flexibility exercises
-        Exercise(name="Sun Salutation", category="Flexibility", muscle_group="Full Body", equipment="Yoga Mat", difficulty="Beginner", calories_per_minute=3.0),
-        Exercise(name="Hamstring Stretch", category="Flexibility", muscle_group="Legs", equipment="None", difficulty="Beginner", calories_per_minute=2.5)
+        Exercise(name="Sun Salutation", category="Flexibility", muscle_group="Full Body", description="Yoga flow sequence"),
+        Exercise(name="Hamstring Stretch", category="Flexibility", muscle_group="Legs", description="Seated or standing hamstring stretch")
     ]
     
     db.session.add_all(exercises)
@@ -44,9 +46,9 @@ def create_users():
     print("Creating users...")
     
     users = [
-        User(username="fitfanatic", email="fitfanatic@example.com", age=28, height=175.0, weight=70.0, fitness_goal="Build muscle", target_weight=75.0, experience_level="Intermediate"),
-        User(username="cardioqueen", email="cardioqueen@example.com", age=32, height=165.0, weight=60.0, fitness_goal="Improve endurance", target_weight=58.0, experience_level="Beginner"),
-        User(username="yogamaster", email="yogamaster@example.com", age=45, height=170.0, weight=65.0, fitness_goal="Increase flexibility", target_weight=65.0, experience_level="Advanced")
+        User(username="fitfanatic", email="fitfanatic@example.com", age=28, height=175.0, weight=70.0, fitness_goal="Build muscle", target_weight=75.0),
+        User(username="cardioqueen", email="cardioqueen@example.com", age=32, height=165.0, weight=60.0, fitness_goal="Improve endurance", target_weight=58.0),
+        User(username="yogamaster", email="yogamaster@example.com", age=45, height=170.0, weight=65.0, fitness_goal="Increase flexibility", target_weight=65.0)
     ]
     
     # Set passwords for all users
@@ -65,15 +67,55 @@ def create_workouts(users, exercises):
     workout_date = datetime.now().date()
     
     # User 1: Strength workouts
-    workouts.append(Workout(user_id=users[0].id, name="Upper Body Strength", date=workout_date - timedelta(days=2), duration=45, calories_burned=320, workout_type="Strength"))
-    workouts.append(Workout(user_id=users[0].id, name="Leg Day", date=workout_date - timedelta(days=4), duration=60, calories_burned=450, workout_type="Strength"))
+    workouts.append(Workout(
+        user_id=users[0].id, 
+        name="Upper Body Strength", 
+        description="Chest and arms workout", 
+        date=workout_date - timedelta(days=2), 
+        duration=45, 
+        calories_burned=320, 
+        workout_type="Strength"
+    ))
+    workouts.append(Workout(
+        user_id=users[0].id, 
+        name="Leg Day", 
+        description="Lower body strength training", 
+        date=workout_date - timedelta(days=4), 
+        duration=60, 
+        calories_burned=450, 
+        workout_type="Strength"
+    ))
     
     # User 2: Cardio workouts
-    workouts.append(Workout(user_id=users[1].id, name="Morning Run", date=workout_date - timedelta(days=1), duration=30, calories_burned=300, workout_type="Cardio"))
-    workouts.append(Workout(user_id=users[1].id, name="HIIT Session", date=workout_date - timedelta(days=3), duration=25, calories_burned=280, workout_type="HIIT"))
+    workouts.append(Workout(
+        user_id=users[1].id, 
+        name="Morning Run", 
+        description="5k morning run in the park", 
+        date=workout_date - timedelta(days=1), 
+        duration=30, 
+        calories_burned=300, 
+        workout_type="Cardio"
+    ))
+    workouts.append(Workout(
+        user_id=users[1].id, 
+        name="HIIT Session", 
+        description="High-intensity interval training", 
+        date=workout_date - timedelta(days=3), 
+        duration=25, 
+        calories_burned=280, 
+        workout_type="HIIT"
+    ))
     
     # User 3: Flexibility workouts
-    workouts.append(Workout(user_id=users[2].id, name="Morning Yoga", date=workout_date, duration=40, calories_burned=180, workout_type="Yoga"))
+    workouts.append(Workout(
+        user_id=users[2].id, 
+        name="Morning Yoga", 
+        description="Daily yoga routine for flexibility", 
+        date=workout_date, 
+        duration=40, 
+        calories_burned=180, 
+        workout_type="Yoga"
+    ))
     
     db.session.add_all(workouts)
     db.session.commit()
@@ -86,23 +128,97 @@ def create_workout_exercises(workouts, exercises, users):
     workout_exercises = []
     
     # Workout 1: Upper Body Strength
-    workout_exercises.append(WorkoutExercise(user_id=users[0].id, workout_id=workouts[0].id, exercise_id=exercises[3].id, sets=3, reps=15, order=1))
-    workout_exercises.append(WorkoutExercise(user_id=users[0].id, workout_id=workouts[0].id, exercise_id=exercises[5].id, sets=3, reps=12, weight=12.5, order=2))
-    workout_exercises.append(WorkoutExercise(user_id=users[0].id, workout_id=workouts[0].id, exercise_id=exercises[6].id, sets=4, reps=8, weight=60.0, order=3))
+    workout_exercises.append(WorkoutExercise(
+        user_id=users[0].id, 
+        workout_id=workouts[0].id, 
+        exercise_id=exercises[3].id,  # Push-ups
+        sets=3, 
+        reps=15, 
+        order=1,
+        notes="Bodyweight push-ups"
+    ))
+    workout_exercises.append(WorkoutExercise(
+        user_id=users[0].id, 
+        workout_id=workouts[0].id, 
+        exercise_id=exercises[5].id,  # Dumbbell Curls
+        sets=3, 
+        reps=12, 
+        weight=12.5, 
+        order=2,
+        notes="12.5kg dumbbells"
+    ))
+    workout_exercises.append(WorkoutExercise(
+        user_id=users[0].id, 
+        workout_id=workouts[0].id, 
+        exercise_id=exercises[6].id,  # Bench Press
+        sets=4, 
+        reps=8, 
+        weight=60.0, 
+        order=3,
+        notes="60kg bench press"
+    ))
     
     # Workout 2: Leg Day
-    workout_exercises.append(WorkoutExercise(user_id=users[0].id, workout_id=workouts[1].id, exercise_id=exercises[4].id, sets=4, reps=10, weight=80.0, order=1))
-    workout_exercises.append(WorkoutExercise(user_id=users[0].id, workout_id=workouts[1].id, exercise_id=exercises[7].id, sets=3, reps=6, weight=100.0, order=2))
+    workout_exercises.append(WorkoutExercise(
+        user_id=users[0].id, 
+        workout_id=workouts[1].id, 
+        exercise_id=exercises[4].id,  # Squats
+        sets=4, 
+        reps=10, 
+        weight=80.0, 
+        order=1,
+        notes="80kg squats"
+    ))
+    workout_exercises.append(WorkoutExercise(
+        user_id=users[0].id, 
+        workout_id=workouts[1].id, 
+        exercise_id=exercises[7].id,  # Deadlift
+        sets=3, 
+        reps=6, 
+        weight=100.0, 
+        order=2,
+        notes="100kg deadlifts"
+    ))
     
     # Workout 3: Morning Run
-    workout_exercises.append(WorkoutExercise(user_id=users[1].id, workout_id=workouts[2].id, exercise_id=exercises[0].id, duration=1800, distance=5.0, calories_burned=300, order=1))
+    workout_exercises.append(WorkoutExercise(
+        user_id=users[1].id, 
+        workout_id=workouts[2].id, 
+        exercise_id=exercises[0].id,  # Running
+        duration=1800, 
+        distance=5.0, 
+        order=1,
+        notes="5k morning run"
+    ))
     
     # Workout 4: HIIT Session
-    workout_exercises.append(WorkoutExercise(user_id=users[1].id, workout_id=workouts[3].id, exercise_id=exercises[2].id, duration=900, calories_burned=180, order=1))
-    workout_exercises.append(WorkoutExercise(user_id=users[1].id, workout_id=workouts[3].id, exercise_id=exercises[3].id, sets=3, reps=10, order=2))
+    workout_exercises.append(WorkoutExercise(
+        user_id=users[1].id, 
+        workout_id=workouts[3].id, 
+        exercise_id=exercises[2].id,  # Jump Rope
+        duration=900, 
+        order=1,
+        notes="15 minutes jump rope"
+    ))
+    workout_exercises.append(WorkoutExercise(
+        user_id=users[1].id, 
+        workout_id=workouts[3].id, 
+        exercise_id=exercises[3].id,  # Push-ups
+        sets=3, 
+        reps=10, 
+        order=2,
+        notes="Push-ups circuit"
+    ))
     
     # Workout 5: Morning Yoga
-    workout_exercises.append(WorkoutExercise(user_id=users[2].id, workout_id=workouts[4].id, exercise_id=exercises[8].id, duration=2400, calories_burned=180, order=1))
+    workout_exercises.append(WorkoutExercise(
+        user_id=users[2].id, 
+        workout_id=workouts[4].id, 
+        exercise_id=exercises[8].id,  # Sun Salutation
+        duration=2400, 
+        order=1,
+        notes="40 minutes yoga flow"
+    ))
     
     db.session.add_all(workout_exercises)
     db.session.commit()
@@ -115,17 +231,37 @@ def create_progress_logs(users):
     progress_logs = []
     base_date = datetime.now().date()
     
-    # User 1 progress logs
+    # User 1 progress logs (strength focused)
     for i in range(4):
-        progress_logs.append(ProgressLog(user_id=users[0].id, log_date=base_date - timedelta(weeks=i), weight=70.0 - (i * 0.5), chest=95.0 + (i * 0.5), waist=80.0 - (i * 1.0), biceps=32.0 + (i * 0.3), energy_level=8, mood="Great"))
+        progress_logs.append(ProgressLog(
+            user_id=users[0].id, 
+            log_date=base_date - timedelta(weeks=i), 
+            weight=70.0 - (i * 0.5), 
+            chest=95.0 + (i * 0.5), 
+            waist=80.0 - (i * 1.0), 
+            biceps=32.0 + (i * 0.3),
+            notes=f"Week {i+1} - Strength training progress"
+        ))
     
-    # User 2 progress logs
+    # User 2 progress logs (weight loss focused)
     for i in range(4):
-        progress_logs.append(ProgressLog(user_id=users[1].id, log_date=base_date - timedelta(weeks=i), weight=60.0 - (i * 0.8), waist=70.0 - (i * 1.2), hips=95.0 - (i * 0.8), energy_level=7, mood="Good"))
+        progress_logs.append(ProgressLog(
+            user_id=users[1].id, 
+            log_date=base_date - timedelta(weeks=i), 
+            weight=60.0 - (i * 0.8), 
+            waist=70.0 - (i * 1.2), 
+            hips=95.0 - (i * 0.8),
+            notes=f"Week {i+1} - Cardio and diet progress"
+        ))
     
-    # User 3 progress logs
+    # User 3 progress logs (maintenance focused)
     for i in range(4):
-        progress_logs.append(ProgressLog(user_id=users[2].id, log_date=base_date - timedelta(weeks=i), weight=65.0, energy_level=9, mood="Great"))
+        progress_logs.append(ProgressLog(
+            user_id=users[2].id, 
+            log_date=base_date - timedelta(weeks=i), 
+            weight=65.0,
+            notes=f"Week {i+1} - Yoga and flexibility maintenance"
+        ))
     
     db.session.add_all(progress_logs)
     db.session.commit()

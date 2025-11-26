@@ -1,7 +1,7 @@
 from flask import request, jsonify
 from flask_restful import Resource
-from server.models import db, Exercise
-from server.utils.jwt_handler import token_required
+from models import db, Exercise
+from utils.jwt_handler import token_required
 
 class ExerciseResource(Resource):
     @token_required

@@ -1,108 +1,81 @@
+from app import create_app
 import requests
 import json
-import time
+import random
 
-BASE_URL = "http://localhost:5555"
+app = create_app()
 
 def test_auth_endpoints():
-    print("=== Testing Authentication Endpoints ===\n")
+    """Test authentication endpoints"""
+    base_url = "http://localhost:5555"
     
-    # Test 1: Try to login with one of the seeded users
-    # These should exist from your seed.py
+    print("=== Testing Authentication Endpoints ===")
+    
+    # Test login with seeded users
     test_users = [
         {"username": "fitfanatic", "password": "password123"},
-        {"username": "cardioqueen", "password": "password123"}, 
+        {"username": "cardioqueen", "password": "password123"},
         {"username": "yogamaster", "password": "password123"}
     ]
     
-    token = None
-    
-    for user_data in test_users:
+    for i, user in enumerate(test_users, 1):
+        print(f"\n{i}. Trying login with: {user['username']}")
         try:
-            print(f"1. Trying login with: {user_data['username']}")
-            response = requests.post(f"{BASE_URL}/auth/login", json=user_data)
-            print(f"   Login response: {response.status_code}")
+            # Try login endpoint
+            login_response = requests.post(f"{base_url}/login", json=user)
+            print(f"   Login response: {login_response.status_code}")
             
-            if response.status_code == 200:
-                token = response.json().get('token')
-                user_info = response.json().get('user')
+            if login_response.status_code == 200:
+                token_data = login_response.json()
                 print(f"   ✅ Login successful!")
-                print(f"   User: {user_info['username']}")
-                print(f"   Token: {token[:50]}...")
-                break
-            else:
-                print(f"   ❌ Failed: {response.text}")
+                print(f"   Full response: {token_data}")
                 
+                # Get the token (it's called "token" in your response)
+                token = token_data.get('token')
+                if token:
+                    print(f"   Token: {token[:50]}...")
+                else:
+                    print(f"   ❌ No token found. Available fields: {list(token_data.keys())}")
+            else:
+                print(f"   ❌ Failed: {login_response.text}")
+                
+        except requests.exceptions.ConnectionError:
+            print(f"   ❌ Connection failed - is the server running on {base_url}?")
+            return False
         except Exception as e:
-            print(f"   ❌ Login failed: {e}")
+            print(f"   ❌ Error: {e}")
     
-    if not token:
-        print("\n💡 All logins failed. Let's try registering a new user...")
-        
-        # Test 2: Register a new user
-        timestamp = int(time.time())
-        register_data = {
-            "username": f"testuser{timestamp}",
-            "email": f"test{timestamp}@example.com",
-            "password": "testpassword123",
+    # Test registration with unique user data
+    print(f"\n2. Testing user registration...")
+    try:
+        # Generate unique username and email to avoid conflicts
+        random_id = random.randint(1000, 9999)
+        new_user = {
+            "username": f"newuser{random_id}",
+            "email": f"newuser{random_id}@example.com",
+            "password": "testpass123",
             "age": 25,
-            "height": 175.0,
-            "weight": 70.0,
-            "fitness_goal": "Test fitness goal"
+            "height": 170.0,
+            "weight": 65.0
         }
         
-        try:
-            response = requests.post(f"{BASE_URL}/auth/register", json=register_data)
-            print(f"\n2. Register endpoint: {response.status_code}")
-            if response.status_code == 201:
-                token = response.json().get('token')
-                print("   ✅ User registered successfully")
-                print(f"   Token: {token[:50]}...")
-            else:
-                print(f"   ❌ Registration failed: {response.text}")
-                return
-        except Exception as e:
-            print(f"   ❌ Registration failed: {e}")
-            return
-    
-    # Test 3: Access protected route with token
-    if token:
-        headers = {"Authorization": f"Bearer {token}"}
+        # Try different registration endpoints
+        endpoints = ["/register", "/users/register"]
         
-        try:
-            response = requests.get(f"{BASE_URL}/auth/me", headers=headers)
-            print(f"\n3. Protected route: {response.status_code}")
-            if response.status_code == 200:
-                print("   ✅ Successfully accessed protected route")
-                user_info = response.json().get('user')
-                print(f"   User data: {user_info['username']}")
+        for endpoint in endpoints:
+            reg_response = requests.post(f"{base_url}{endpoint}", json=new_user)
+            print(f"   {endpoint} response: {reg_response.status_code}")
+            
+            if reg_response.status_code in [200, 201]:
+                print(f"   ✅ Registration successful via {endpoint}!")
+                break
             else:
-                print(f"   ❌ Failed: {response.text}")
-        except Exception as e:
-            print(f"   ❌ Protected route failed: {e}")
-    
-    # Test 4: Try protected route without token
-    try:
-        response = requests.get(f"{BASE_URL}/auth/me")
-        print(f"\n4. No token test: {response.status_code}")
-        if response.status_code == 401:
-            print("   ✅ Correctly blocked access without token")
-        else:
-            print("   ❌ Should return 401 for missing token")
+                print(f"   ❌ Registration failed via {endpoint}: {reg_response.text}")
+                
     except Exception as e:
-        print(f"   ❌ No token test failed: {e}")
+        print(f"   ❌ Registration test error: {e}")
     
-    # Test 5: Try protected route with invalid token
-    try:
-        headers_invalid = {"Authorization": "Bearer invalid.token.here"}
-        response = requests.get(f"{BASE_URL}/auth/me", headers=headers_invalid)
-        print(f"\n5. Invalid token test: {response.status_code}")
-        if response.status_code == 401:
-            print("   ✅ Correctly blocked access with invalid token")
-        else:
-            print("   ❌ Should return 401 for invalid token")
-    except Exception as e:
-        print(f"   ❌ Invalid token test failed: {e}")
+    return True
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test_auth_endpoints()

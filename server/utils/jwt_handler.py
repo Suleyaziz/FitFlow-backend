@@ -1,12 +1,20 @@
 import jwt
 from functools import wraps
 from flask import request, jsonify, current_app
-from server.models import User
+from models import User
 
 def create_token(user_id):
-    payload = {"user_id": user_id}
-    token = jwt.encode(payload, current_app.config["JWT_SECRET_KEY"], algorithm="HS256")
-    return token
+    try:
+        payload = {"user_id": user_id}
+        print(f"Creating token for user_id: {user_id}")  # Debug
+        print(f"JWT Secret Key: {current_app.config.get('JWT_SECRET_KEY')}")  # Debug
+        
+        token = jwt.encode(payload, current_app.config["JWT_SECRET_KEY"], algorithm="HS256")
+        print(f"Generated token: {token}")  # Debug
+        return token
+    except Exception as e:
+        print(f"Token creation error: {e}")  # Debug
+        return None
 
 def token_required(f):
     @wraps(f)
@@ -22,7 +30,8 @@ def token_required(f):
             user = User.query.get(user_id)
             if not user:
                 raise Exception("User not found")
-        except Exception:
+        except Exception as e:
+            print(f"Token validation error: {e}")  # Debug
             return jsonify({"error": "Invalid or expired token"}), 401
         return f(current_user=user, *args, **kwargs)
     return decorated

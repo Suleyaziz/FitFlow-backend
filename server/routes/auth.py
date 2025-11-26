@@ -1,7 +1,7 @@
 from flask_restful import Resource
 from flask import request, jsonify
-from server.models import User, db
-from server.utils.jwt_handler import create_token
+from models import User, db
+from utils.jwt_handler import create_token
 
 class RegisterAPI(Resource):
     def post(self):
@@ -38,4 +38,7 @@ class LoginAPI(Resource):
             return {"error": "Invalid credentials"}, 401
 
         token = create_token(user.id)
+        if not token:
+            return{"error":"Token creation failed"}, 500
+        
         return jsonify({"message": "Login successful", "token": token, "user": user.to_dict()})

@@ -1,8 +1,8 @@
 # server/routes/users.py
 from flask import request, jsonify, current_app
 from flask_restful import Resource
-from server.models import User
-from server.extensions import db
+from models import User
+from extensions import db
 import jwt
 from datetime import datetime, timedelta
 
