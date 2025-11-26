@@ -5,7 +5,7 @@ from utils.jwt_handler import token_required
 
 class ProgressLogResource(Resource):
     @token_required
-    def get(current_user, self, log_id=None):
+    def get(self, current_user, log_id=None):  # Fixed: self first
         if log_id:
             log = ProgressLog.query.get(log_id)
             if not log:
@@ -15,7 +15,7 @@ class ProgressLogResource(Resource):
         return [l.to_dict() for l in logs], 200
 
     @token_required
-    def post(current_user, self):
+    def post(self, current_user):  # Fixed: self first
         data = request.get_json()
         try:
             log = ProgressLog(
@@ -37,7 +37,7 @@ class ProgressLogResource(Resource):
             return {"error": str(e)}, 400
 
     @token_required
-    def put(current_user, self, log_id):
+    def put(self, current_user, log_id):  # Fixed: self first
         log = ProgressLog.query.get(log_id)
         if not log:
             return {"error": "Progress log not found"}, 404
@@ -49,7 +49,7 @@ class ProgressLogResource(Resource):
         return {"message": "Progress log updated", "log": log.to_dict()}, 200
 
     @token_required
-    def delete(current_user, self, log_id):
+    def delete(self, current_user, log_id):  # Fixed: self first
         log = ProgressLog.query.get(log_id)
         if not log:
             return {"error": "Progress log not found"}, 404

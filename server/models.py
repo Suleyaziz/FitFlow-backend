@@ -28,8 +28,8 @@ class User(db.Model, SerializerMixin):
     progress_logs = db.relationship("ProgressLog", backref="user", cascade="all, delete-orphan", lazy=True)
     workout_exercises = db.relationship("WorkoutExercise", backref="user", cascade="all, delete-orphan", lazy=True)
 
-    # FIXED: Remove circular references
-    serialize_rules = ('-password_hash', '-workouts.user', '-progress_logs.user', '-workout_exercises.user', '-workouts.workout_exercises.workout')
+    # SIMPLIFIED: Remove all relationship serialization
+    serialize_rules = ('-password_hash', '-workouts', '-progress_logs', '-workout_exercises')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -80,8 +80,8 @@ class Workout(db.Model, SerializerMixin):
 
     workout_exercises = db.relationship("WorkoutExercise", backref="workout", cascade="all, delete-orphan", lazy=True)
     
-    # FIXED: Simplify serialize rules
-    serialize_rules = ('-user.workouts', '-workout_exercises.workout', '-workout_exercises.user')
+    # SIMPLIFIED: Remove all relationship serialization
+    serialize_rules = ('-workout_exercises',)
 
 # -----------------------
 # Exercise model
@@ -98,8 +98,8 @@ class Exercise(db.Model, SerializerMixin):
 
     workout_exercises = db.relationship("WorkoutExercise", backref="exercise", cascade="all, delete-orphan", lazy=True)
     
-    # FIXED: Simplify
-    serialize_rules = ('-workout_exercises.exercise',)
+    # SIMPLIFIED: Remove all relationship serialization
+    serialize_rules = ('-workout_exercises',)
 
 # -----------------------
 # WorkoutExercise model
@@ -121,8 +121,8 @@ class WorkoutExercise(db.Model, SerializerMixin):
     order = db.Column(db.Integer)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # FIXED: Remove circular references
-    serialize_rules = ('-user.workout_exercises', '-workout.workout_exercises', '-exercise.workout_exercises')
+    # SIMPLIFIED: Remove all relationship serialization
+    serialize_rules = ()
 
 # -----------------------
 # ProgressLog model
@@ -142,5 +142,5 @@ class ProgressLog(db.Model, SerializerMixin):
     notes = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # FIXED: Simplify
-    serialize_rules = ('-user.progress_logs',)
+    # SIMPLIFIED: Remove all relationship serialization
+    serialize_rules = ()

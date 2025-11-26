@@ -5,7 +5,7 @@ from utils.jwt_handler import token_required
 
 class WorkoutResource(Resource):
     @token_required
-    def get(current_user, self, workout_id=None):
+    def get(self, current_user, workout_id=None):  # ← FIXED: self first!
         if workout_id:
             workout = Workout.query.get(workout_id)
             if not workout:
@@ -15,7 +15,7 @@ class WorkoutResource(Resource):
         return [w.to_dict() for w in workouts], 200
 
     @token_required
-    def post(current_user, self):
+    def post(self, current_user):  # ← FIXED: self first!
         data = request.get_json()
         try:
             workout = Workout(
@@ -34,7 +34,7 @@ class WorkoutResource(Resource):
             return {"error": str(e)}, 400
 
     @token_required
-    def put(current_user, self, workout_id):
+    def put(self, current_user, workout_id):  # ← FIXED: self first!
         workout = Workout.query.get(workout_id)
         if not workout:
             return {"error": "Workout not found"}, 404
@@ -46,7 +46,7 @@ class WorkoutResource(Resource):
         return {"message": "Workout updated", "workout": workout.to_dict()}, 200
 
     @token_required
-    def delete(current_user, self, workout_id):
+    def delete(self, current_user, workout_id):  # ← FIXED: self first!
         workout = Workout.query.get(workout_id)
         if not workout:
             return {"error": "Workout not found"}, 404

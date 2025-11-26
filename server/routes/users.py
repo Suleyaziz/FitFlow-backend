@@ -3,6 +3,7 @@ from flask import request, jsonify, current_app
 from flask_restful import Resource
 from models import User
 from extensions import db
+from utils.jwt_handler import token_required  # Added import
 import jwt
 from datetime import datetime, timedelta
 
@@ -51,7 +52,7 @@ class UserLoginResource(Resource):
             "exp": datetime.utcnow() + timedelta(hours=1)
         }
         token = jwt.encode(payload, current_app.config["JWT_SECRET_KEY"], algorithm="HS256")
-        return {"message": "Login successful", "token": token}, 200
+        return {"message": "Login successful", "token": token, "user": user.to_dict()}, 200  # Added user to response
 
 # User logout
 class UserLogoutResource(Resource):
@@ -64,7 +65,8 @@ class UserLogoutResource(Resource):
 
 # User profile CRUD
 class UserResource(Resource):
-    def get(self, user_id=None):
+    @token_required  # Added decorator
+    def get(self, current_user, user_id=None):  # Fixed: self first, added current_user
         if user_id:
             user = User.query.get(user_id)
             if not user:
@@ -73,7 +75,8 @@ class UserResource(Resource):
         users = User.query.all()
         return [u.to_dict() for u in users], 200
 
-    def put(self, user_id):
+    @token_required  # Added decorator
+    def put(self, current_user, user_id):  # Fixed: self first, added current_user
         user = User.query.get(user_id)
         if not user:
             return {"message": "User not found"}, 404
@@ -86,7 +89,8 @@ class UserResource(Resource):
         db.session.commit()
         return {"message": "User updated", "user": user.to_dict()}, 200
 
-    def delete(self, user_id):
+    @token_required  # Added decorator
+    def delete(self, current_user, user_id):  # Fixed: self first, added current_user
         user = User.query.get(user_id)
         if not user:
             return {"message": "User not found"}, 404
