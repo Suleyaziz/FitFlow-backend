@@ -7,7 +7,7 @@ Flask-CORS==4.0.0
 Flask-SQLAlchemy==3.0.5
 SQLAlchemy==1.4.46
 Flask-Migrate==4.0.5
-psycopg2-binary==2.9.9
+psycopg2==2.9.9
 SQLAlchemy-serializer==1.4.1
 
 # Authentication & Security
@@ -17,14 +17,3 @@ PyJWT==2.8.0
 Werkzeug==2.3.7
 python-dotenv==1.0.0
 gunicorn==21.2.0
-
-# Remove these for now (optional dependencies):
-# bcrypt==4.1.2
-# marshmallow==3.20.1
-# marshmallow-sqlalchemy==0.29.0
-# Faker==19.13.0
-# pytest==7.4.3
-# requests==2.31.0
-# Jinja2==3.1.2
-# click==8.1.7
-# itsdangerous==2.1.2
