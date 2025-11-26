@@ -1,8 +1,8 @@
 from flask import request, current_app
 from flask_restful import Resource
-from models import User  # ← Now imports from root
-from extensions import db  # ← Now imports from root
-from utils.jwt_handler import token_required  # ← This stays the same
+from models import User
+from extensions import db
+from server.utils.jwt_handler import token_required  # ← ADDED 'server.'
 import jwt
 from datetime import datetime, timedelta
 

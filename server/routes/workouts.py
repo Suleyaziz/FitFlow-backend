@@ -1,7 +1,7 @@
 from flask import request
 from flask_restful import Resource
 from models import db, Workout
-from utils.jwt_handler import token_required
+from server.utils.jwt_handler import token_required
 
 class WorkoutResource(Resource):
     @token_required

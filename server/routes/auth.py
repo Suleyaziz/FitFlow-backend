@@ -1,7 +1,7 @@
 from flask_restful import Resource
 from flask import request
 from models import User, db
-from utils.jwt_handler import create_token
+from server.utils.jwt_handler import create_token
 
 class RegisterAPI(Resource):
     def post(self):
