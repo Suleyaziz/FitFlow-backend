@@ -5,13 +5,19 @@ from server.utils.jwt_handler import token_required
 
 class WorkoutResource(Resource):
     @token_required
-    def get(self, current_user, workout_id=None):  # ← FIXED: self first!
+    def get(self, current_user, workout_id=None):
         if workout_id:
-            workout = Workout.query.get(workout_id)
+            # FIXED: Filter by user_id to prevent accessing other users' workouts
+            workout = Workout.query.filter_by(
+                id=workout_id,
+                user_id=current_user.id
+            ).first()
             if not workout:
                 return {"error": "Workout not found"}, 404
             return workout.to_dict(), 200
-        workouts = Workout.query.all()
+        
+        # FIXED: Only return current user's workouts
+        workouts = Workout.query.filter_by(user_id=current_user.id).all()
         return [w.to_dict() for w in workouts], 200
 
     @token_required
@@ -34,10 +40,15 @@ class WorkoutResource(Resource):
             return {"error": str(e)}, 400
 
     @token_required
-    def put(self, current_user, workout_id):  # ← FIXED: self first!
-        workout = Workout.query.get(workout_id)
+    def put(self, current_user, workout_id):
+        # FIXED: Verify user owns this workout
+        workout = Workout.query.filter_by(
+            id=workout_id,
+            user_id=current_user.id
+        ).first()
         if not workout:
             return {"error": "Workout not found"}, 404
+        
         data = request.get_json()
         for key in ['name', 'description', 'duration', 'calories_burned', 'workout_type']:
             if key in data:
@@ -46,8 +57,12 @@ class WorkoutResource(Resource):
         return {"message": "Workout updated", "workout": workout.to_dict()}, 200
 
     @token_required
-    def delete(self, current_user, workout_id):  # ← FIXED: self first!
-        workout = Workout.query.get(workout_id)
+    def delete(self, current_user, workout_id):
+        # FIXED: Verify user owns this workout
+        workout = Workout.query.filter_by(
+            id=workout_id,
+            user_id=current_user.id
+        ).first()
         if not workout:
             return {"error": "Workout not found"}, 404
         db.session.delete(workout)

@@ -1,7 +1,7 @@
 from flask_restful import Resource
 from flask import request
 from models import User, db
-from server.utils.jwt_handler import create_token
+from server.utils.jwt_handler import create_token, token_required
 
 class RegisterAPI(Resource):
     def post(self):
@@ -41,5 +41,10 @@ class LoginAPI(Resource):
         if not token:
             return {"error": "Token creation failed"}, 500
         
-        # FIXED LINE:
         return {"message": "Login successful", "token": token, "user": user.to_dict()}, 200
+
+class CurrentUserAPI(Resource):
+    """Get current authenticated user - ADDED to fix /auth/me endpoint"""
+    @token_required
+    def get(self, current_user):
+        return {"user": current_user.to_dict()}, 200
