@@ -1,6 +1,7 @@
-from app import app
-from models import db, User  # Import your models
+# init_db.py
+from run import app  # Import from run.py
+from models import db
 
 with app.app_context():
     db.create_all()
-    print("Database tables created!")
+    print("✅ Database tables created successfully!")
