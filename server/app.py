@@ -22,7 +22,7 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
 
-    api = Api(app, prefix='/api')  # ⚠️ IMPORTANT: Add /api prefix!
+    api = Api(app)  
     register_routes(api)
 
     @app.route('/')
