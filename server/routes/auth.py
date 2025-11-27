@@ -1,7 +1,8 @@
 from flask_restful import Resource
 from flask import request, jsonify
-from server.models import User, db
-from server.utils.jwt_handler import create_token
+from models import User, db
+from utils.jwt_handler import create_token, token_required
+
 
 class RegisterAPI(Resource):
     def post(self):
@@ -22,7 +23,9 @@ class RegisterAPI(Resource):
         db.session.add(user)
         db.session.commit()
 
-        return {"message": "User registered successfully", "user": user.to_dict()}, 201
+        token = create_token(user.id)
+        return {"user": user.to_dict(), "token": token}, 201
+
 
 class LoginAPI(Resource):
     def post(self):
@@ -33,9 +36,17 @@ class LoginAPI(Resource):
         if not all([username, password]):
             return {"error": "Missing username or password"}, 400
 
-        user = User.query.filter_by(username=username).first()
+        user = User.query.filter((User.username == username) | (User.email == username)).first()
         if not user or not user.check_password(password):
             return {"error": "Invalid credentials"}, 401
 
+
         token = create_token(user.id)
-        return jsonify({"message": "Login successful", "token": token, "user": user.to_dict()})
+        return {"user": user.to_dict(), "token": token}, 200
+
+class CurrentUserAPI(Resource):
+    @token_required
+    def get(self, current_user):
+        """Get current authenticated user"""
+        return {"user": current_user.to_dict()}, 200
+

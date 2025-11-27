@@ -1,9 +1,9 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_restful import Api
-from server.config import Config
-from server.extensions import db, migrate
-from server.routes import register_routes
+from config import Config
+from extensions import db, migrate
+from routes import register_routes
 
 def create_app():
     """Flask application factory"""
