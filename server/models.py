@@ -3,8 +3,7 @@ from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy.orm import validates
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-from extensions import db
-
+from server.extensions import db
 
 # -----------------------
 # User model
@@ -61,39 +60,12 @@ class Workout(db.Model, SerializerMixin):
     description = db.Column(db.Text)
     date = db.Column(db.Date, nullable=False, default=datetime.utcnow)
     duration = db.Column(db.Integer)
-    calories = db.Column(db.Float)
+    calories_burned = db.Column(db.Float)
     workout_type = db.Column(db.String(50))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     workout_exercises = db.relationship("WorkoutExercise", backref="workout", cascade="all, delete-orphan", lazy=True)
     serialize_rules = ('-user.workouts', '-workout_exercises.workout')
-
-    def to_dict(self):
-        """Custom serialization to match frontend expectations"""
-        # Get exercises for this workout
-        exercises = []
-        for we in self.workout_exercises:
-            exercises.append({
-                'name': we.exercise.name if we.exercise else 'Unknown',
-                'sets': we.sets,
-                'reps': we.reps,
-                'weight': we.weight,
-                'duration': we.duration,
-                'distance': we.distance
-            })
-        
-        return {
-            'id': self.id,
-            'userId': self.user_id,
-            'name': self.name,
-            'description': self.description,
-            'date': self.date.isoformat() if self.date else None,
-            'duration': self.duration,
-            'calories': self.calories,
-            'workoutType': self.workout_type,
-            'exercises': exercises
-        }
-
 
 # -----------------------
 # Exercise model
@@ -143,7 +115,6 @@ class ProgressLog(db.Model, SerializerMixin):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     log_date = db.Column(db.Date, nullable=False, default=datetime.utcnow)
     weight = db.Column(db.Float)
-    body_fat = db.Column(db.Float)
     chest = db.Column(db.Float)
     waist = db.Column(db.Float)
     hips = db.Column(db.Float)
@@ -153,21 +124,3 @@ class ProgressLog(db.Model, SerializerMixin):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     serialize_rules = ('-user.workouts', '-user.progress_logs')
-
-    def to_dict(self):
-        """Custom serialization to match frontend expectations"""
-        return {
-            'id': self.id,
-            'userId': self.user_id,
-            'date': self.log_date.isoformat() if self.log_date else None,
-            'weight': self.weight,
-            'bodyFat': self.body_fat,
-            'measurements': {
-                'chest': self.chest,
-                'waist': self.waist,
-                'hips': self.hips,
-                'arms': self.biceps,  # Map biceps to arms for frontend
-                'thighs': self.thighs
-            }
-        }
-

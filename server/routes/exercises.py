@@ -1,12 +1,11 @@
 from flask import request, jsonify
 from flask_restful import Resource
-from models import db, Exercise
-from utils.jwt_handler import token_required
-
+from server.models import db, Exercise
+from server.utils.jwt_handler import token_required
 
 class ExerciseResource(Resource):
     @token_required
-    def get(self, current_user, exercise_id=None):
+    def get(current_user, self, exercise_id=None):
         if exercise_id:
             exercise = Exercise.query.get(exercise_id)
             if not exercise:
@@ -16,7 +15,7 @@ class ExerciseResource(Resource):
         return [e.to_dict() for e in exercises], 200
 
     @token_required
-    def post(self, current_user):
+    def post(current_user, self):
         data = request.get_json()
         try:
             exercise = Exercise(
@@ -33,7 +32,7 @@ class ExerciseResource(Resource):
             return {"error": str(e)}, 400
 
     @token_required
-    def put(self, current_user, exercise_id):
+    def put(current_user, self, exercise_id):
         exercise = Exercise.query.get(exercise_id)
         if not exercise:
             return {"error": "Exercise not found"}, 404
@@ -45,7 +44,7 @@ class ExerciseResource(Resource):
         return {"message": "Exercise updated", "exercise": exercise.to_dict()}, 200
 
     @token_required
-    def delete(self, current_user, exercise_id):
+    def delete(current_user, self, exercise_id):
         exercise = Exercise.query.get(exercise_id)
         if not exercise:
             return {"error": "Exercise not found"}, 404

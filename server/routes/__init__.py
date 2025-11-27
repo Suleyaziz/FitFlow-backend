@@ -2,19 +2,17 @@
 from flask_restful import Api
 
 # Import all resource classes
-from routes.users import (
+from server.routes.users import (
     UserRegisterResource,
     UserLoginResource,
     UserLogoutResource,
     UserResource,
 )
-from routes.workouts import WorkoutResource
-from routes.exercises import ExerciseResource
-from routes.workout_exercises import WorkoutExerciseResource
-from routes.progress_logs import ProgressLogResource
-from routes.auth import RegisterAPI, LoginAPI, CurrentUserAPI
-
-
+from server.routes.workouts import WorkoutResource
+from server.routes.exercises import ExerciseResource
+from server.routes.workout_exercises import WorkoutExerciseResource
+from server.routes.progress_logs import ProgressLogResource
+from server.routes.auth import RegisterAPI, LoginAPI
 
 def register_routes(api: Api):
     """Register all API routes"""
@@ -22,9 +20,11 @@ def register_routes(api: Api):
     # Auth routes
     api.add_resource(RegisterAPI, "/register")
     api.add_resource(LoginAPI, "/login")
-    api.add_resource(CurrentUserAPI, "/auth/me")
 
-    # User routes (for profile management)
+    # User routes
+    api.add_resource(UserRegisterResource, "/users/register")
+    api.add_resource(UserLoginResource, "/users/login")
+    api.add_resource(UserLogoutResource, "/users/logout")
     api.add_resource(UserResource, "/users", "/users/<int:user_id>")
 
     # Workouts
@@ -36,5 +36,5 @@ def register_routes(api: Api):
     # WorkoutExercises
     api.add_resource(WorkoutExerciseResource, "/workout_exercises", "/workout_exercises/<int:we_id>")
 
-    # Progress Logs (renamed to /progress for frontend compatibility)
-    api.add_resource(ProgressLogResource, "/progress", "/progress/<int:log_id>")
+    # ProgressLogs
+    api.add_resource(ProgressLogResource, "/progress_logs", "/progress_logs/<int:log_id>")
