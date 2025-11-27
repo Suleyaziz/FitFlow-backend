@@ -41,7 +41,6 @@ class LoginAPI(Resource):
         if not token:
             return {"error": "Token creation failed"}, 500
         
-        # FIXED LINE:
         return {"message": "Login successful", "token": token, "user": user.to_dict()}, 200
 
 class CurrentUserAPI(Resource):
