@@ -1,7 +1,8 @@
 import jwt
 from functools import wraps
 from flask import request, jsonify, current_app
-from server.models import User
+from models import User
+
 
 def create_token(user_id):
     payload = {"user_id": user_id}
