@@ -21,7 +21,7 @@ def token_required(f):
     def decorated(*args, **kwargs):
         token = request.headers.get("Authorization", None)
         if not token:
-            return {"error": "Token missing"}, 401  # REMOVED jsonify()
+            return {"error": "Token missing"}, 401
         if token.startswith("Bearer "):
             token = token.replace("Bearer ", "")
         try:
@@ -31,7 +31,14 @@ def token_required(f):
             if not user:
                 raise Exception("User not found")
         except Exception as e:
-            print(f"Token validation error: {e}")  # Debug
-            return {"error": "Invalid or expired token"}, 401  # REMOVED jsonify()
+            print(f"Token validation error: {e}")
+            return {"error": "Invalid or expired token"}, 401
+        
+        # FIXED: Handle both function and method (class-based view) signatures
+        # If the first argument is a Resource instance (self), pass it through
+        if args and hasattr(args[0], 'dispatch_request'): 
+             # It's likely a Flask-RESTful Resource method
+            return f(args[0], current_user=user, *args[1:], **kwargs)
+            
         return f(current_user=user, *args, **kwargs)
     return decorated
