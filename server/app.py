@@ -10,21 +10,54 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    CORS(app)
+    # IMPROVED CORS - allows all origins for development
+    CORS(app, resources={
+        r"/*": {
+            "origins": "*",
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"],
+        }
+    })
+
     db.init_app(app)
     migrate.init_app(app, db)
 
-    api = Api(app)
+    api = Api(app, prefix='/api')  # ⚠️ IMPORTANT: Add /api prefix!
     register_routes(api)
 
     @app.route('/')
     def index():
         return jsonify({"message": "FitFlow Fitness Tracker API is running"}), 200
 
+    @app.route('/api/health')
+    def health():
+        return jsonify({"status": "healthy"}), 200
+
     @app.errorhandler(Exception)
     def handle_exception(e):
-        response = {"error": str(e), "message": "An unexpected error occurred"}
-        return jsonify(response), 500
+        import traceback
+        print(f"❌ ERROR: {str(e)}")
+        traceback.print_exc()
+        
+        response = jsonify({
+            "error": str(e), 
+            "message": "An unexpected error occurred"
+        })
+        response.status_code = 500
+        
+        # ⚠️ CRITICAL: Add CORS headers to error responses
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+        
+        return response
+
+    # Handle CORS preflight requests
+    @app.after_request
+    def after_request(response):
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+        response.headers['Access-Control-Allow-Methods'] = 'GET,POST,PUT,DELETE,OPTIONS'
+        return response
 
     return app
 
