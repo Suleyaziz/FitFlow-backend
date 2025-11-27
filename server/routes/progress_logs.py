@@ -5,12 +5,18 @@ from server.utils.jwt_handler import token_required
 
 class ProgressLogResource(Resource):
     @token_required
-    def get(self, current_user, log_id=None):  # Fixed: self first
+    def get(self, current_user, log_id=None):
         if log_id:
-            log = ProgressLog.query.get(log_id)
+            # FIXED: Filter by user_id
+            log = ProgressLog.query.filter_by(
+                id=log_id,
+                user_id=current_user.id
+            ).first()
             if not log:
                 return {"error": "Progress log not found"}, 404
             return log.to_dict(), 200
+        
+        # Already filtered by user - good!
         logs = ProgressLog.query.filter_by(user_id=current_user.id).all()
         return [l.to_dict() for l in logs], 200
 
@@ -37,10 +43,15 @@ class ProgressLogResource(Resource):
             return {"error": str(e)}, 400
 
     @token_required
-    def put(self, current_user, log_id):  # Fixed: self first
-        log = ProgressLog.query.get(log_id)
+    def put(self, current_user, log_id):
+        # FIXED: Verify user owns this log
+        log = ProgressLog.query.filter_by(
+            id=log_id,
+            user_id=current_user.id
+        ).first()
         if not log:
             return {"error": "Progress log not found"}, 404
+        
         data = request.get_json()
         for key in ['log_date', 'weight', 'chest', 'waist', 'hips', 'biceps', 'thighs', 'notes']:
             if key in data:
@@ -49,8 +60,12 @@ class ProgressLogResource(Resource):
         return {"message": "Progress log updated", "log": log.to_dict()}, 200
 
     @token_required
-    def delete(self, current_user, log_id):  # Fixed: self first
-        log = ProgressLog.query.get(log_id)
+    def delete(self, current_user, log_id):
+        # FIXED: Verify user owns this log
+        log = ProgressLog.query.filter_by(
+            id=log_id,
+            user_id=current_user.id
+        ).first()
         if not log:
             return {"error": "Progress log not found"}, 404
         db.session.delete(log)

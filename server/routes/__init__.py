@@ -15,7 +15,7 @@ from .workouts import WorkoutResource
 from .exercises import ExerciseResource
 from .workout_exercises import WorkoutExerciseResource
 from .progress_logs import ProgressLogResource
-from .auth import RegisterAPI, LoginAPI
+from .auth import RegisterAPI, LoginAPI, CurrentUserAPI
 
 def register_routes(api: Api):
     """Register all API routes"""
@@ -23,6 +23,7 @@ def register_routes(api: Api):
     # Auth routes
     api.add_resource(RegisterAPI, "/register")
     api.add_resource(LoginAPI, "/login")
+    api.add_resource(CurrentUserAPI, "/auth/me")  # ADDED: Fix missing endpoint
 
     # User routes
     api.add_resource(UserRegisterResource, "/users/register")
