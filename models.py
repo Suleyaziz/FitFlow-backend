@@ -72,7 +72,7 @@ class Workout(db.Model, SerializerMixin):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     name = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text)
-    date = db.Column(db.Date, nullable=False, default=datetime.utcnow)
+    date = db.Column(db.Date, nullable=False, default=lambda: datetime.utcnow().date())
     duration = db.Column(db.Integer)
     calories_burned = db.Column(db.Float)
     workout_type = db.Column(db.String(50))
@@ -82,6 +82,19 @@ class Workout(db.Model, SerializerMixin):
     
     # FIXED: Exclude DateTime fields and relationships
     serialize_rules = ('-workout_exercises', '-created_at')
+    
+    def to_dict(self):
+        """Custom serialization to ensure date is included"""
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'name': self.name,
+            'description': self.description,
+            'date': self.date.isoformat() if self.date else None,
+            'duration': self.duration,
+            'calories_burned': self.calories_burned,
+            'workout_type': self.workout_type
+        }
 
 # -----------------------
 # Exercise model
@@ -132,7 +145,7 @@ class ProgressLog(db.Model, SerializerMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    log_date = db.Column(db.Date, nullable=False, default=datetime.utcnow)
+    log_date = db.Column(db.Date, nullable=False, default=lambda: datetime.utcnow().date())
     weight = db.Column(db.Float)
     chest = db.Column(db.Float)
     waist = db.Column(db.Float)
@@ -144,3 +157,18 @@ class ProgressLog(db.Model, SerializerMixin):
 
     # FIXED: Exclude DateTime fields
     serialize_rules = ('-created_at',)
+    
+    def to_dict(self):
+        """Custom serialization to ensure log_date is included"""
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'log_date': self.log_date.isoformat() if self.log_date else None,
+            'weight': self.weight,
+            'chest': self.chest,
+            'waist': self.waist,
+            'hips': self.hips,
+            'biceps': self.biceps,
+            'thighs': self.thighs,
+            'notes': self.notes
+        }
