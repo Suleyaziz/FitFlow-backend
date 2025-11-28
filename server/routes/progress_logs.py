@@ -24,9 +24,15 @@ class ProgressLogResource(Resource):
     def post(self, current_user):  # Fixed: self first
         data = request.get_json()
         try:
+            # Parse log_date string to date object
+            from datetime import datetime
+            log_date = data.get('log_date')
+            if log_date and isinstance(log_date, str):
+                log_date = datetime.strptime(log_date, '%Y-%m-%d').date()
+            
             log = ProgressLog(
                 user_id=current_user.id,
-                log_date=data.get('log_date'),
+                log_date=log_date,
                 weight=data.get('weight'),
                 chest=data.get('chest'),
                 waist=data.get('waist'),
@@ -53,6 +59,12 @@ class ProgressLogResource(Resource):
             return {"error": "Progress log not found"}, 404
         
         data = request.get_json()
+        
+        # Parse log_date if provided
+        from datetime import datetime
+        if 'log_date' in data and isinstance(data['log_date'], str):
+            data['log_date'] = datetime.strptime(data['log_date'], '%Y-%m-%d').date()
+        
         for key in ['log_date', 'weight', 'chest', 'waist', 'hips', 'biceps', 'thighs', 'notes']:
             if key in data:
                 setattr(log, key, data[key])

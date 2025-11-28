@@ -24,10 +24,17 @@ class WorkoutResource(Resource):
     def post(self, current_user):  # ← FIXED: self first!
         data = request.get_json()
         try:
+            # Parse date string to date object
+            from datetime import datetime
+            workout_date = data.get('date')
+            if workout_date and isinstance(workout_date, str):
+                workout_date = datetime.strptime(workout_date, '%Y-%m-%d').date()
+            
             workout = Workout(
                 user_id=current_user.id,
                 name=data['name'],
                 description=data.get('description'),
+                date=workout_date,
                 duration=data.get('duration'),
                 calories_burned=data.get('calories_burned'),
                 workout_type=data.get('workout_type')
@@ -50,7 +57,13 @@ class WorkoutResource(Resource):
             return {"error": "Workout not found"}, 404
         
         data = request.get_json()
-        for key in ['name', 'description', 'duration', 'calories_burned', 'workout_type']:
+        
+        # Parse date if provided
+        from datetime import datetime
+        if 'date' in data and isinstance(data['date'], str):
+            data['date'] = datetime.strptime(data['date'], '%Y-%m-%d').date()
+        
+        for key in ['name', 'description', 'date', 'duration', 'calories_burned', 'workout_type']:
             if key in data:
                 setattr(workout, key, data[key])
         db.session.commit()

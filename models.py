@@ -113,6 +113,16 @@ class Exercise(db.Model, SerializerMixin):
     
     # FIXED: Exclude DateTime field
     serialize_rules = ('-workout_exercises', '-created_at')
+    
+    def to_dict(self):
+        """Custom serialization for Exercise"""
+        return {
+            'id': self.id,
+            'name': self.name,
+            'category': self.category,
+            'muscle_group': self.muscle_group,
+            'description': self.description
+        }
 
 # -----------------------
 # WorkoutExercise model
@@ -136,6 +146,22 @@ class WorkoutExercise(db.Model, SerializerMixin):
 
     # FIXED: Exclude DateTime field
     serialize_rules = ('-created_at',)
+    
+    def to_dict(self):
+        """Custom serialization for WorkoutExercise"""
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'workout_id': self.workout_id,
+            'exercise_id': self.exercise_id,
+            'sets': self.sets,
+            'reps': self.reps,
+            'weight': self.weight,
+            'duration': self.duration,
+            'distance': self.distance,
+            'notes': self.notes,
+            'order': self.order
+        }
 
 # -----------------------
 # ProgressLog model
