@@ -81,7 +81,7 @@ class Workout(db.Model, SerializerMixin):
     workout_exercises = db.relationship("WorkoutExercise", backref="workout", cascade="all, delete-orphan", lazy=True)
     
     # FIXED: Exclude DateTime fields and relationships
-    serialize_rules = ('-workout_exercises', '-created_at', '-date')
+    serialize_rules = ('-workout_exercises', '-created_at')
 
 # -----------------------
 # Exercise model
@@ -143,4 +143,4 @@ class ProgressLog(db.Model, SerializerMixin):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # FIXED: Exclude DateTime fields
-    serialize_rules = ('-created_at', '-log_date')
+    serialize_rules = ('-created_at',)

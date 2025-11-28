@@ -22,7 +22,6 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
 
-    # FIXED: Create tables if they don't exist (since migrations folder is missing)
     with app.app_context():
         db.create_all()
 
