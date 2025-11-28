@@ -173,6 +173,7 @@ class ProgressLog(db.Model, SerializerMixin):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     log_date = db.Column(db.Date, nullable=False, default=lambda: datetime.utcnow().date())
     weight = db.Column(db.Float)
+    body_fat = db.Column(db.Float)  # Body fat percentage
     chest = db.Column(db.Float)
     waist = db.Column(db.Float)
     hips = db.Column(db.Float)
@@ -191,6 +192,7 @@ class ProgressLog(db.Model, SerializerMixin):
             'user_id': self.user_id,
             'log_date': self.log_date.isoformat() if self.log_date else None,
             'weight': self.weight,
+            'body_fat': self.body_fat,
             'chest': self.chest,
             'waist': self.waist,
             'hips': self.hips,

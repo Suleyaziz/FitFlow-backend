@@ -34,6 +34,7 @@ class ProgressLogResource(Resource):
                 user_id=current_user.id,
                 log_date=log_date,
                 weight=data.get('weight'),
+                body_fat=data.get('body_fat'),
                 chest=data.get('chest'),
                 waist=data.get('waist'),
                 hips=data.get('hips'),
@@ -65,7 +66,7 @@ class ProgressLogResource(Resource):
         if 'log_date' in data and isinstance(data['log_date'], str):
             data['log_date'] = datetime.strptime(data['log_date'], '%Y-%m-%d').date()
         
-        for key in ['log_date', 'weight', 'chest', 'waist', 'hips', 'biceps', 'thighs', 'notes']:
+        for key in ['log_date', 'weight', 'body_fat', 'chest', 'waist', 'hips', 'biceps', 'thighs', 'notes']:
             if key in data:
                 setattr(log, key, data[key])
         db.session.commit()
