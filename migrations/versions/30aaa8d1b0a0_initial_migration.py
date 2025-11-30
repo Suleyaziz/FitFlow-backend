@@ -50,10 +50,6 @@ def upgrade():
         # batch_op.drop_column('experience_level')
         # batch_op.drop_column('daily_calorie_goal')
 
-    with op.batch_alter_table('workout_exercises', schema=None) as batch_op:
-        # batch_op.drop_column('calories_burned')
-
-    with op.batch_alter_table('workouts', schema=None) as batch_op:
         batch_op.alter_column('name',
                existing_type=sa.VARCHAR(length=100),
                type_=sa.String(length=120),
@@ -70,10 +66,6 @@ def downgrade():
                type_=sa.VARCHAR(length=100),
                existing_nullable=False)
 
-    with op.batch_alter_table('workout_exercises', schema=None) as batch_op:
-        # batch_op.add_column(sa.Column('calories_burned', sa.FLOAT(), nullable=True))
-
-    with op.batch_alter_table('users', schema=None) as batch_op:
         # batch_op.add_column(sa.Column('daily_calorie_goal', sa.INTEGER(), nullable=True))
         # batch_op.add_column(sa.Column('experience_level', sa.VARCHAR(length=20), nullable=True))
         # batch_op.add_column(sa.Column('updated_at', sa.DATETIME(), nullable=True))
