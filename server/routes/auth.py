@@ -22,7 +22,12 @@ class RegisterAPI(Resource):
         db.session.add(user)
         db.session.commit()
 
-        return {"message": "User registered successfully", "user": user.to_dict()}, 201
+        # Generate token for auto-login after registration
+        token = create_token(user.id)
+        if not token:
+            return {"error": "Token creation failed"}, 500
+
+        return {"message": "User registered successfully", "token": token, "user": user.to_dict()}, 201
 
 class LoginAPI(Resource):
     def post(self):
